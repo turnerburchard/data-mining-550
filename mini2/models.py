@@ -4,7 +4,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import Lasso, Ridge
-from scipy.interpolate import interpolate
+from scipy import interpolate
 import preprocessing
 
 df = preprocessing.preprocess()
@@ -81,42 +81,46 @@ print(cross_validate(pca_model, X, df['Sale Price']))
 
 # Non-linear Models - Polynomial and Smooth spline models
 
+# TODO does this work ? It takes forever to run
 # Polynomial regression
-def polynomial_regression(X, y, degree):
-    print("Fitting polynomial regression model with degree: ", degree)
-    model = PolynomialFeatures(degree=degree)
-    model.fit_transform(X)
-    poly_reg_model = LinearRegression()
-    poly_reg_model.fit(model, y)
+# def polynomial_regression(X, y, degree):
+#     print("Fitting polynomial regression model with degree: ", degree)
+#     model = PolynomialFeatures(degree=degree)
+#     model.fit_transform(X)
+#     poly_reg_model = LinearRegression()
+#     poly_reg_model.fit(model, y)
+#
+#     return poly_reg_model
+#
+#
+# X = df.drop(columns=['Sale Price'])
+# y = df['Sale Price']
+# degree = 5
+# poly_model = polynomial_regression(X, y, degree)
+#
+# print("Polynomial Regression Error: ")
+# print(cross_validate(poly_model, X, y))
 
-    return poly_reg_model
 
-
-X = df.drop(columns=['Sale Price'])
-y = df['Sale Price']
-degree = 5
-poly_model = polynomial_regression(X, y, degree)
-
-print("Polynomial Regression Error: ")
-print(cross_validate(poly_model, X, y))
-
-
+# TODO doesn't work
 # Scipy cubic spline interpolation
-def smooth_spline_regression(X, y):
-    model = interpolate.splrep(X, y)
-
-    return model
-
-
-X = df.drop(columns=['Sale Price'])
-y = df['Sale Price']
-spline_model = smooth_spline_regression(X, y)
-
-print("Spline Regression Error: ")
-print(cross_validate(spline_model, X, y))
+# def smooth_spline_regression(X, y):
+#     model = interpolate.splrep(X, y)
+#
+#     return model
+#
+#
+# X = df.drop(columns=['Sale Price'])
+# y = df['Sale Price']
+# spline_model = smooth_spline_regression(X, y)
+#
+# print("Spline Regression Error: ")
+# print(cross_validate(spline_model, X, y))
 
 
 # Regularization
+# TODO both return warnings of "ill conditioned matrix" and "convergence warning" - hyper issue?
+
 
 # Lasso regularization
 def lasso_regularization(X, y, alpha=1):
