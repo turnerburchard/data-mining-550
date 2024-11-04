@@ -3,7 +3,6 @@ from sklearn.model_selection import cross_val_score
 from sklearn.feature_selection import SelectKBest
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import Lasso, Ridge
 from scipy.interpolate import interpolate
 import preprocessing
@@ -81,11 +80,16 @@ print(cross_validate(pca_model, X, df['Sale Price']))
 
 
 # Non-linear Models - Polynomial and Smooth spline models
-def polynomial_regression(X, y, degree=2):
-    # make pipeline???
-    model = make_pipeline(PolynomialFeatures(degree), LinearRegression())
-    model.fit(X, y)
-    return model
+
+# Polynomial regression
+def polynomial_regression(X, y, degree):
+    print("Fitting polynomial regression model with degree: ", degree)
+    model = PolynomialFeatures(degree=degree)
+    model.fit_transform(X)
+    poly_reg_model = LinearRegression()
+    poly_reg_model.fit(model, y)
+
+    return poly_reg_model
 
 
 X = df.drop(columns=['Sale Price'])
