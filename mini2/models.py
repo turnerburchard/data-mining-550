@@ -1,9 +1,9 @@
 import numpy as np
 from sklearn.model_selection import cross_val_score
-from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import Lasso, Ridge
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.linear_model import Lasso, LassoCV, Ridge, RidgeCV
 from scipy import interpolate
 import preprocessing
 
@@ -52,7 +52,7 @@ print(cross_validate(multiple_model, df.drop(columns=['Sale Price']), df['Sale P
 
 
 def subset_selection(X, y, k):
-    selector = SelectKBest(k=k)
+    selector = SelectKBest(score_func=f_regression, k=k)
     return selector.fit_transform(X, y)
 
 
@@ -122,6 +122,10 @@ print(cross_validate(pca_model, X, df['Sale Price']))
 # TODO both return warnings of "ill conditioned matrix" and "convergence warning" - hyper issue?
 
 
+def lassocv_regularization(X, y):
+    lasso_cv = LassoCV(cv=5).fit(X, y)
+    return lasso_cv
+
 # Lasso regularization
 def lasso_regularization(X, y, alpha=1):
     model = Lasso(alpha=alpha)
@@ -131,11 +135,16 @@ def lasso_regularization(X, y, alpha=1):
 
 X = df.drop(columns=['Sale Price'])
 y = df['Sale Price']
-lasso_model = lasso_regularization(X, y)
+#lasso_model = lasso_regularization(X, y)
+lasscv_model = lassocv_regularization(X, y)
 
 print("Lasso Regression Error: ")
-print(cross_validate(lasso_model, X, y))
+#print(cross_validate(lasso_model, X, y))
+print(lasscv_model.score(X, y)) # this uses the R^2 score
 
+def ridgecv_regularization(X, y):
+    ridgecv_model = RidgeCV(cv=5).fit(X, y)
+    return ridgecv_model
 
 # Ridge regularization
 def ridge_regularization(X, y, alpha=1):
@@ -143,11 +152,13 @@ def ridge_regularization(X, y, alpha=1):
     model.fit(X, y)
     return model
 
+scaler = StandardScaler()
 
-X = df.drop(columns=['Sale Price'])
+X_scaled = scaler.fit_transform(df.drop(columns=['Sale Price']))
 y = df['Sale Price']
-ridge_model = ridge_regularization(X, y)
+#ridge_model = ridge_regularization(X, y)
+ridgecv_model = ridgecv_regularization(X_scaled, y)
 
 print("Ridge Regression Error: ")
-print(cross_validate(ridge_model, X, y))
-
+#print(cross_validate(ridge_model, X, y))
+print(ridgecv_model.score(X_scaled, y)) # this is the R^2 score
