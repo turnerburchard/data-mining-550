@@ -3,7 +3,7 @@ import numpy as np
 
 
 def preprocess():
-    df = pd.read_csv("cook_county_train_val.csv")
+    df = pd.read_csv("mini2/cook_county_train_val.csv")
     # drop rows with missing sale price
     df = df[df['Sale Price'] > 1]
     # drop categorical variables
