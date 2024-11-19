@@ -17,8 +17,10 @@ import numpy as np
 # TODO Analyze how good our clusters are (helps with below)
 # TODO Determine how many clusters to use
 
-
-
+"""
+Calls embedding model
+Currently uses fastembed, could switch to other models
+"""
 class Embedder:
     def __init__(self):
         self.embedding_model = TextEmbedding()
@@ -30,6 +32,13 @@ class Embedder:
     def embed_texts(self, texts):
         return list(self.embedding_model.embed(texts))
 
+"""
+Reduces dimensions of embedded data.
+PCA is useful as it takes the large (384+) dimension data and finds the 2 with the most variance between them.
+This makes sense here because most dimensions will be very similar, as all titles are related to a single topic.
+
+Then clusters data with different algorithms
+"""
 class Clusterer:
     def __init__(self, data):
         self.data = np.array(data)
@@ -55,7 +64,10 @@ class Clusterer:
         plt.colorbar(label='Cluster')
         plt.show()
 
-# using library
+
+"""
+Calls the crossref API to get a number of smaples of papers with abstracts on given topic and timeframe
+"""
 def call_api(topic, sample_size=100, long_ago=1):
     etiquette = Etiquette('Research Clustering', '1.0',
                           'turnerburchard.com', 'turnerburchard@gmail.com')
@@ -72,6 +84,10 @@ def call_api(topic, sample_size=100, long_ago=1):
 
     return filtered.sample(sample_size)
 
+
+"""
+Gets out desired info from the crossref API response
+"""
 def get_info(item):
     return [item['title'], item['publisher'], item['abstract']]
 
