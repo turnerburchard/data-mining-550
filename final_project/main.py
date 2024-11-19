@@ -11,8 +11,12 @@ import numpy as np
 
 
 # TODO LIST
+# TODO improve things - dimension reduction & clustering first
 # TODO Get and cache many abstracts
 # TODO Label clusters intelligently
+# TODO Analyze how good our clusters are (helps with below)
+# TODO Determine how many clusters to use
+
 
 
 class Embedder:
