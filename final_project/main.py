@@ -12,6 +12,7 @@ import numpy as np
 
 # TODO LIST
 # TODO improve things - dimension reduction & clustering first
+# TODO better topic selection - does the search work as we expect?
 # TODO Get and cache many abstracts
 # TODO Label clusters intelligently
 # TODO Analyze how good our clusters are (helps with below)
@@ -27,9 +28,11 @@ class Embedder:
         print("Embedding model ready")
 
     def embed_text(self, text):
+        print("Embedding text")
         return list(self.embedding_model.embed([text]))[0]
 
     def embed_texts(self, texts):
+        print("Embedding texts")
         return list(self.embedding_model.embed(texts))
 
 """
@@ -38,14 +41,29 @@ PCA is useful as it takes the large (384+) dimension data and finds the 2 with t
 This makes sense here because most dimensions will be very similar, as all titles are related to a single topic.
 
 Then clusters data with different algorithms
+
+Could also cluster on slightly more dimensions - we should text/visualize how much variance is captured per dimension of PCA
 """
 class Clusterer:
     def __init__(self, data):
         self.data = np.array(data)
 
     def reduce_dimensions(self, n_components=2):
+        print(f"Reducing dimensions to {n_components}")
         pca = PCA(n_components=n_components)
         self.data = pca.fit_transform(self.data)
+
+    def test_pca(self, n_components=10):
+        variance_captured = []
+        for components in range(1, n_components):
+            print(f"Testing {components} components")
+            pca = PCA(n_components=components)
+            pca.fit_transform(self.data)
+            variance_captured.append(sum(pca.explained_variance_ratio_))
+
+        # line graph of variance captured by number of components
+        plt.plot(range(1, n_components), variance_captured)
+        plt.show()
 
     def kmeans(self, n_clusters=2):
         kmeans = KMeans(n_clusters=n_clusters, random_state=0)
@@ -101,6 +119,10 @@ def main():
     data = embedder.embed_texts([item['abstract'] for item in query])
 
     clusterer = Clusterer(data)
+
+    clusterer.test_pca(20)
+
+
     clusterer.reduce_dimensions(2)
     kmeans_clusters = clusterer.kmeans()
     clusterer.visualize(kmeans_clusters)
