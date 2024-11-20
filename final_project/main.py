@@ -9,7 +9,6 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 # TODO LIST
 # TODO improve things - dimension reduction & clustering first
 # TODO better topic selection - does the search work as we expect?
@@ -22,6 +21,8 @@ import numpy as np
 Calls embedding model
 Currently uses fastembed, could switch to other models
 """
+
+
 class Embedder:
     def __init__(self):
         self.embedding_model = TextEmbedding()
@@ -35,6 +36,7 @@ class Embedder:
         print("Embedding texts")
         return list(self.embedding_model.embed(texts))
 
+
 """
 Reduces dimensions of embedded data.
 PCA is useful as it takes the large (384+) dimension data and finds the 2 with the most variance between them.
@@ -44,6 +46,8 @@ Then clusters data with different algorithms
 
 Could also cluster on slightly more dimensions - we should text/visualize how much variance is captured per dimension of PCA
 """
+
+
 class Clusterer:
     def __init__(self, data):
         self.data = np.array(data)
@@ -86,6 +90,8 @@ class Clusterer:
 """
 Calls the crossref API to get a number of smaples of papers with abstracts on given topic and timeframe
 """
+
+
 def call_api(topic, sample_size=100, long_ago=1):
     etiquette = Etiquette('Research Clustering', '1.0',
                           'turnerburchard.com', 'turnerburchard@gmail.com')
@@ -106,9 +112,10 @@ def call_api(topic, sample_size=100, long_ago=1):
 """
 Gets out desired info from the crossref API response
 """
+
+
 def get_info(item):
     return [item['title'], item['publisher'], item['abstract']]
-
 
 
 def main():
@@ -122,7 +129,6 @@ def main():
 
     clusterer.test_pca(20)
 
-
     clusterer.reduce_dimensions(2)
     kmeans_clusters = clusterer.kmeans()
     clusterer.visualize(kmeans_clusters)
@@ -134,5 +140,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
