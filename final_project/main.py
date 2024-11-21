@@ -1,7 +1,6 @@
 # https://api.crossref.org/swagger-ui/index.html#/Works/get_works
 
 from datetime import datetime
-import requests
 from crossref.restful import Works, Etiquette
 from fastembed import TextEmbedding
 from sklearn.cluster import KMeans
@@ -10,13 +9,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # TODO LIST
-# TODO improve things - dimension reduction & clustering first
 # TODO better topic selection - does the search work as we expect?
-# TODO Get and cache many abstracts
-# TODO Label clusters intelligently
-# TODO Analyze how good our clusters are (helps with below)
-# TODO Determine how many clusters to use
-# TODO More clustering techniques - DBSCAN, Hierarchical Agglomerative Clustering (Maybe matches structure), SOM (good for high dimensions)
+# TODO Get and cache many abstracts in a file
+# TODO Label clusters intelligently with their meaning - unembed the centroids with KNN?
+# TODO Analyze how good our clusters are (helps with below) - what metrics are used in the literature?
+# TODO Determine how many clusters to use - hyperparameter tuning
+# TODO Implement More clustering techniques - DBSCAN, Hierarchical Agglomerative Clustering (Maybe matches structure), SOM (good for high dimensions)
 # TODO Do we just embed abstracts? Get keywords and tiles out as well?
 
 """
