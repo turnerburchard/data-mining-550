@@ -16,6 +16,8 @@ import numpy as np
 # TODO Label clusters intelligently
 # TODO Analyze how good our clusters are (helps with below)
 # TODO Determine how many clusters to use
+# TODO More clustering techniques - DBSCAN, Hierarchical Agglomerative Clustering (Maybe matches structure), SOM (good for high dimensions)
+# TODO Do we just embed abstracts? Get keywords and tiles out as well?
 
 """
 Calls embedding model
