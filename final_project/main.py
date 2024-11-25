@@ -7,23 +7,23 @@ from cluster import Clusterer
 from embed import Embedder
 
 # temp stuff so we dont have to keep pinging api
-from pickle_helpers import save_to_pkl, load_from_pkl  
+from pickle_helpers import save_to_pkl, load_from_pkl
 import os
 
 # TODO LIST
-# TODO better topic selection - does the search work as we expect?
-# TODO Get and cache many abstracts in a file
+# TODO better topic selection - does the search work as we expect? does "Computer Science" return only CS papers?
+# TODO Get and cache many abstracts in a file - shoot for 10,000 at least
 # TODO Label clusters intelligently with their meaning - unembed the centroids with KNN?
-# TODO Analyze how good our clusters are (helps with below) - what metrics are used in the literature?
+# TODO Do we just use silhouette score? Any other metrics?
 # TODO Determine how many clusters to use - hyperparameter tuning
-# TODO Implement More clustering techniques - DBSCAN, Hierarchical Agglomerative Clustering (Maybe matches structure), SOM (good for high dimensions)
+# TODO Implement More clustering techniques - SOM (good for high dimensions) - any specific to embedded text?
 # TODO Do we just embed abstracts? Get keywords and tiles out as well?
-
 
 
 """
 Calls the crossref API to get a number of smaples of papers with abstracts on given topic and timeframe
 """
+
 
 def call_api(topic, sample_size=100, long_ago=1):
     etiquette = Etiquette('Research Clustering', '1.0',
@@ -52,15 +52,16 @@ def get_info(item):
 
 
 def main():
-    if not os.path.exists('final_project/data.pkl'):
+    filename = 'data.pkl'
+    if not os.path.exists(filename):
         embedder = Embedder()
-        topic = 'Software Engineering'
-        query = call_api(topic, 50, 1)
+        topic = 'Computer Science'
+        query = call_api(topic, 100, 1)
 
         data = embedder.embed_texts([item['abstract'] for item in query])
-        save_to_pkl(data)
+        save_to_pkl(data, filename)
     else:
-        data = load_from_pkl()
+        data = load_from_pkl(filename)
 
     clusterer = Clusterer(data)
     opt_num_components = clusterer.optimal_pca_components(show_graph=True)
@@ -68,7 +69,14 @@ def main():
 
     clusterer.reduce_dimensions(2)
     kmeans_clusters = clusterer.kmeans()
-    clusterer.visualize(kmeans_clusters)
+    clusterer.visualize(kmeans_clusters, "KMeans")
+
+    # dbscan_clusters = clusterer.dbscan()
+    # runs and visualizes
+    clusterer.visualize_dbscan()
+
+    agg_clusters = clusterer.agglomerative()
+    clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
 
     # for item in query:
     #     print(get_info(item))
