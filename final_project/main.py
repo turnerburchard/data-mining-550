@@ -1,13 +1,14 @@
 # https://api.crossref.org/swagger-ui/index.html#/Works/get_works
 
 from datetime import datetime
-import requests
 from crossref.restful import Works, Etiquette
-from fastembed import TextEmbedding
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
-import numpy as np
+
+from cluster import Clusterer
+from embed import Embedder
+
+# temp stuff so we dont have to keep pinging api
+from pickle_helpers import save_to_pkl, load_from_pkl  
+import os
 
 # TODO LIST
 # TODO improve things - dimension reduction & clustering first
@@ -17,80 +18,11 @@ import numpy as np
 # TODO Analyze how good our clusters are (helps with below)
 # TODO Determine how many clusters to use
 
-"""
-Calls embedding model
-Currently uses fastembed, could switch to other models
-"""
-
-
-class Embedder:
-    def __init__(self):
-        self.embedding_model = TextEmbedding()
-        print("Embedding model ready")
-
-    def embed_text(self, text):
-        print("Embedding text")
-        return list(self.embedding_model.embed([text]))[0]
-
-    def embed_texts(self, texts):
-        print("Embedding texts")
-        return list(self.embedding_model.embed(texts))
-
-
-"""
-Reduces dimensions of embedded data.
-PCA is useful as it takes the large (384+) dimension data and finds the 2 with the most variance between them.
-This makes sense here because most dimensions will be very similar, as all titles are related to a single topic.
-
-Then clusters data with different algorithms
-
-Could also cluster on slightly more dimensions - we should text/visualize how much variance is captured per dimension of PCA
-"""
-
-
-class Clusterer:
-    def __init__(self, data):
-        self.data = np.array(data)
-
-    def reduce_dimensions(self, n_components=2):
-        print(f"Reducing dimensions to {n_components}")
-        pca = PCA(n_components=n_components)
-        self.data = pca.fit_transform(self.data)
-
-    def test_pca(self, n_components=10):
-        variance_captured = []
-        for components in range(1, n_components):
-            print(f"Testing {components} components")
-            pca = PCA(n_components=components)
-            pca.fit_transform(self.data)
-            variance_captured.append(sum(pca.explained_variance_ratio_))
-
-        # line graph of variance captured by number of components
-        plt.plot(range(1, n_components), variance_captured)
-        plt.show()
-
-    def kmeans(self, n_clusters=2):
-        kmeans = KMeans(n_clusters=n_clusters, random_state=0)
-        self.labels = kmeans.fit_predict(self.data)
-        return self.labels
-
-    def visualize(self, labels):
-        if self.data.shape[1] != 2:
-            raise ValueError("Data must be 2-dimensional for visualization.")
-
-        plt.figure(figsize=(8, 6))
-        plt.scatter(self.data[:, 0], self.data[:, 1], c=labels, cmap='viridis', s=50, alpha=0.7)
-        plt.title('2D Visualization of Clusters')
-        plt.xlabel('Principal Component 1')
-        plt.ylabel('Principal Component 2')
-        plt.colorbar(label='Cluster')
-        plt.show()
 
 
 """
 Calls the crossref API to get a number of smaples of papers with abstracts on given topic and timeframe
 """
-
 
 def call_api(topic, sample_size=100, long_ago=1):
     etiquette = Etiquette('Research Clustering', '1.0',
@@ -119,15 +51,19 @@ def get_info(item):
 
 
 def main():
-    embedder = Embedder()
-    topic = 'Software Engineering'
-    query = call_api(topic, 50, 1)
+    if not os.path.exists('final_project/data.pkl'):
+        embedder = Embedder()
+        topic = 'Software Engineering'
+        query = call_api(topic, 50, 1)
 
-    data = embedder.embed_texts([item['abstract'] for item in query])
+        data = embedder.embed_texts([item['abstract'] for item in query])
+        save_to_pkl(data)
+    else:
+        data = load_from_pkl()
 
     clusterer = Clusterer(data)
-
-    clusterer.test_pca(20)
+    opt_num_components = clusterer.optimal_pca_components(show_graph=True)
+    clusterer.find_optimal_k()
 
     clusterer.reduce_dimensions(2)
     kmeans_clusters = clusterer.kmeans()
