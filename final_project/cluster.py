@@ -19,6 +19,9 @@ class Clusterer:
     def __init__(self, data):
         self.data = np.array(data)
 
+    def silhouette_score(self, labels):
+        return silhouette_score(self.data, labels)
+
     def reduce_dimensions(self, n_components=2):
         print(f"Reducing dimensions to {n_components}")
         pca = PCA(n_components=n_components)
@@ -145,3 +148,5 @@ class Clusterer:
     def agglomerative(self, n_clusters=2):
         agg = AgglomerativeClustering(n_clusters=n_clusters)
         return agg.fit_predict(self.data)
+
+

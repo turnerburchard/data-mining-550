@@ -21,7 +21,7 @@ import os
 
 
 """
-Calls the crossref API to get a number of smaples of papers with abstracts on given topic and timeframe
+Calls the crossref API to get a number of samples of papers with abstracts on given topic and timeframe
 """
 
 
@@ -53,15 +53,20 @@ def get_info(item):
 
 def main():
     filename = 'data.pkl'
+    sample_size = 10000
     if not os.path.exists(filename):
         embedder = Embedder()
         topic = 'Computer Science'
-        query = call_api(topic, 100, 1)
+        all_vectors = []
 
-        data = embedder.embed_texts([item['abstract'] for item in query])
-        save_to_pkl(data, filename)
-    else:
-        data = load_from_pkl(filename)
+        for i in range(int(sample_size/100)):
+            query = call_api(topic, 100, 1)
+            all_vectors.extend(embedder.embed_texts([item['abstract'] for item in query]))
+
+        # what if we summarize each abstract with a basic LLM first?
+        save_to_pkl(all_vectors, filename)
+
+    data = load_from_pkl(filename)
 
     clusterer = Clusterer(data)
     opt_num_components = clusterer.optimal_pca_components(show_graph=True)
@@ -70,12 +75,18 @@ def main():
     clusterer.reduce_dimensions(2)
     kmeans_clusters = clusterer.kmeans()
     clusterer.visualize(kmeans_clusters, "KMeans")
+    kmeans_score = clusterer.silhouette_score(kmeans_clusters)
+    print("K-means silhouette score: ", kmeans_score)
 
-    # dbscan_clusters = clusterer.dbscan()
+    dbscan_clusters = clusterer.dbscan()
+    # clusterer.silhouette_score(dbscan_clusters)
     # runs and visualizes
-    clusterer.visualize_dbscan()
+    # clusterer.visualize_dbscan()
+
 
     agg_clusters = clusterer.agglomerative()
+    agg_score = clusterer.silhouette_score(agg_clusters)
+    print("Agglomerative silhouette score: ", agg_score)
     clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
 
     # for item in query:
