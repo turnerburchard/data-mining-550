@@ -60,6 +60,7 @@ def main():
         all_vectors = []
 
         for i in range(int(sample_size/100)):
+            print(f"Performing {i}th query")
             query = call_api(topic, 100, 1)
             all_vectors.extend(embedder.embed_texts([item['abstract'] for item in query]))
 
