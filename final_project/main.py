@@ -75,6 +75,8 @@ def main():
 
     clusterer.reduce_dimensions(2)
     kmeans_clusters = clusterer.kmeans()
+    print(f"Centroids for K-Means {clusterer.cluster_centroids()}")
+    # print(f"K-Means Cluster Names {clusterer.name_clusters()}")
     clusterer.visualize(kmeans_clusters, "KMeans")
     kmeans_score = clusterer.silhouette_score(kmeans_clusters)
     print("K-means silhouette score: ", kmeans_score)

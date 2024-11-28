@@ -3,6 +3,8 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import silhouette_score
+from embed import Embedder
+
 
 """
 Reduces dimensions of embedded data.
@@ -149,4 +151,29 @@ class Clusterer:
         agg = AgglomerativeClustering(n_clusters=n_clusters)
         return agg.fit_predict(self.data)
 
+    
+    def cluster_centroids(self):
+        unique_labels = np.unique(self.labels)
+
+        # Compute centroids
+        centroids = []
+        for label in unique_labels:
+            # Get points in the current cluster
+            cluster_points = self.data[self.labels == label]
+            # Compute the mean of these points
+            centroid = cluster_points.mean(axis=0)
+            centroids.append(centroid)
+
+        # Convert list to array for easier use
+        centroids = np.array(centroids)
+
+        return centroids
+
+    # def name_clusters(self):
+    #     embedder = Embedder()
+    #     names = []
+    #     centroids = self.cluster_centroids()
+
+    #     for centroid in centroids:
+    #         names.append(embedder.get_closest_word(centroid))
 
