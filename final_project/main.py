@@ -91,6 +91,7 @@ def main():
     agg_score = clusterer.silhouette_score(agg_clusters)
     print("Agglomerative silhouette score: ", agg_score)
     clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
+    clusterer.visualize_dendrogram()
 
     # for item in query:
     #     print(get_info(item))

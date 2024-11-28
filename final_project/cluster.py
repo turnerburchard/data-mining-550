@@ -1,4 +1,6 @@
 from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.metrics import pairwise_distances
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import numpy as np
@@ -148,9 +150,16 @@ class Clusterer:
 
     # Agglomerative Hierarchical Clustering Implementation
     def agglomerative(self, n_clusters=2):
-        agg = AgglomerativeClustering(n_clusters=n_clusters)
+        agg = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
         return agg.fit_predict(self.data)
 
+    def visualize_dendrogram(self):
+        plt.figure(figsize=(10, 5))
+        dendrogram(linkage(self.data, method='ward'), truncate_mode=None)  # No truncation, full dendrogram
+        plt.title("Dendrogram from Agglomerative Clustering")
+        plt.xlabel("Data Points")
+        plt.ylabel("Euclidean Distance")
+        plt.show()
     
     def cluster_centroids(self):
         unique_labels = np.unique(self.labels)
