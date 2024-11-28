@@ -3,9 +3,11 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.metrics import pairwise_distances
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from minisom import MiniSom
 import numpy as np
 from sklearn.metrics import silhouette_score
 from embed import Embedder
+import math
 
 
 """
@@ -160,15 +162,30 @@ class Clusterer:
         plt.xlabel("Data Points")
         plt.ylabel("Euclidean Distance")
         plt.show()
+
+    def som(self, size = 5):
+        model = MiniSom(x=size, y=size, input_len=self.data.shape[1], sigma=math.sqrt(2*(size**2))/2, learning_rate=0.5)
+        model.random_weights_init(self.data)
+        model.train_random(self.data, num_iteration=100)
+
+        bmus = np.array([model.winner(d) for d in self.data])
+
+        unique_bmus = np.unique(bmus, axis=0)  # Unique BMU positions
+        bmu_to_label = {tuple(bmu): i for i, bmu in enumerate(unique_bmus)}  # Map BMUs to labels
+
+        # Assign cluster labels to data points
+        cluster_labels = np.array([bmu_to_label[tuple(bmu)] for bmu in bmus])
+
+        return cluster_labels
     
-    def cluster_centroids(self):
-        unique_labels = np.unique(self.labels)
+    def cluster_centroids(self, labels):
+        unique_labels = np.unique(labels)
 
         # Compute centroids
         centroids = []
         for label in unique_labels:
             # Get points in the current cluster
-            cluster_points = self.data[self.labels == label]
+            cluster_points = self.data[labels == label]
             # Compute the mean of these points
             centroid = cluster_points.mean(axis=0)
             centroids.append(centroid)

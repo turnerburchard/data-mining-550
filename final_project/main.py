@@ -75,7 +75,7 @@ def main():
 
     clusterer.reduce_dimensions(2)
     kmeans_clusters = clusterer.kmeans()
-    print(f"Centroids for K-Means {clusterer.cluster_centroids()}")
+    print(f"Centroids for K-Means {clusterer.cluster_centroids(kmeans_clusters)}")
     # print(f"K-Means Cluster Names {clusterer.name_clusters()}")
     clusterer.visualize(kmeans_clusters, "KMeans")
     kmeans_score = clusterer.silhouette_score(kmeans_clusters)
@@ -92,6 +92,11 @@ def main():
     print("Agglomerative silhouette score: ", agg_score)
     clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
     clusterer.visualize_dendrogram()
+
+    som_clusters = clusterer.som(size = 2)
+    som_score = clusterer.silhouette_score(som_clusters)
+    print("SOM silhouette score: ", som_score)
+    clusterer.visualize(som_clusters, "SOM")
 
     # for item in query:
     #     print(get_info(item))
