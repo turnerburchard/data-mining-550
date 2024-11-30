@@ -12,14 +12,14 @@ filename = 'data.pkl'
 all_papers = load_from_pkl(filename)
 data = [paper.abstract_vector for paper in all_papers]
 clusterer = Clusterer(data)
-transform_vector = clusterer.reduce_dimensions(2)
+transform = clusterer.reduce_dimensions(2)
 agg_clusters, linkage_matrix = clusterer.agglomerative()
 embedder = Embedder()
 
 # Example function to process inputs
 def process_inputs(text, num):
     search_vector = embedder.embed_text(text)
-    cluster_indices = find_target_cluster(linkage_matrix, search_vector, num, clusterer.data, transform_vector)
+    cluster_indices = find_target_cluster(linkage_matrix, search_vector, num, clusterer.data, transform)
     cluster_titles = [all_papers[i].title for i in cluster_indices]
     return cluster_titles
 

@@ -89,16 +89,20 @@ def main():
 
     all_papers = load_from_pkl(filename)
 
+    embedder = Embedder()
+    title_words = [word.lower() for paper in all_papers for word in paper.title.split()]
+    title_word_vectors = embedder.embed_texts(title_words)
+
     data = [paper.abstract_vector for paper in all_papers]
 
     clusterer = Clusterer(data)
     opt_num_components = clusterer.optimal_pca_components(show_graph=True)
     clusterer.find_optimal_k()
 
-    transform_vector = clusterer.reduce_dimensions(2)
+    clusterer.reduce_dimensions(2)
     kmeans_clusters = clusterer.kmeans()
     print(f"Centroids for K-Means {clusterer.cluster_centroids(kmeans_clusters)}")
-    # print(f"K-Means Cluster Names {clusterer.name_clusters()}")
+    print(f"K-Means Cluster Names {clusterer.name_clusters(kmeans_clusters,title_words, title_word_vectors)}")
     clusterer.visualize(kmeans_clusters, "KMeans")
     kmeans_score = clusterer.silhouette_score(kmeans_clusters)
     print("K-means silhouette score: ", kmeans_score)

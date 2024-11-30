@@ -2,6 +2,7 @@ from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.metrics import pairwise_distances
 from sklearn.decomposition import PCA
+from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 from minisom import MiniSom
 import numpy as np
@@ -32,8 +33,9 @@ class Clusterer:
         print(f"Reducing dimensions to {n_components}")
         pca = PCA(n_components=n_components)
         self.data = pca.fit_transform(self.data)
-        transform_vector = lambda q: pca.transform([q])[0]
-        return transform_vector
+        transform = lambda q: pca.transform([q])[0]
+        self.pca = pca
+        return transform
 
 
     def optimal_pca_components(self, threshold=0.95, show_graph=False):
@@ -196,14 +198,22 @@ class Clusterer:
 
         # Convert list to array for easier use
         centroids = np.array(centroids)
-
+        print()
         return centroids
 
-    # def name_clusters(self):
-    #     embedder = Embedder()
-    #     names = []
-    #     centroids = self.cluster_centroids()
+    def name_clusters(self, labels, potential_names, potential_name_vectors):
+        knn = NearestNeighbors(n_neighbors=3)
 
-    #     for centroid in centroids:
-    #         names.append(embedder.get_closest_word(centroid))
+        potential_name_vectors = self.pca.transform(potential_name_vectors)
+        knn.fit(potential_name_vectors)
+
+        names = []
+        centroids = self.cluster_centroids(labels)
+
+        for centroid in centroids:
+            names_vecs = knn.kneighbors([centroid])[1][0]
+            name_list = [potential_names[i] for i in names_vecs]
+            names.append(" ".join(name_list))
+
+        return names
 
