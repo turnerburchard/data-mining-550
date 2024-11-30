@@ -6,6 +6,8 @@ from crossref.restful import Works, Etiquette
 from cluster import Clusterer
 from embed import Embedder
 
+from data_store import Paper
+
 # temp stuff so we dont have to keep pinging api
 from pickle_helpers import save_to_pkl, load_from_pkl
 import os
@@ -55,19 +57,38 @@ def main():
     filename = 'data.pkl'
     sample_size = 10000
     if not os.path.exists(filename):
+    # if True:
         embedder = Embedder()
         topic = 'Computer Science'
-        all_vectors = []
+        all_abstracts = []
+        all_abstract_vectors = []
+        all_titles = []
+        all_title_vectors = []
 
         for i in range(int(sample_size/100)):
+        # for i in range(1):
             print(f"Performing {i}th query")
             query = call_api(topic, 100, 1)
-            all_vectors.extend(embedder.embed_texts([item['abstract'] for item in query]))
+            
+            titles = [item['title'][0] for item in query]
+            abstracts = [item['abstract'] for item in query]
 
+            all_titles.extend(titles)
+            all_abstracts.extend(abstracts)
+
+            all_title_vectors.extend(embedder.embed_texts(titles))
+            all_abstract_vectors.extend(embedder.embed_texts(abstracts))
+
+        all_papers = []
+        for i in range(len(all_titles)):
+            all_papers.append(Paper(all_titles[i],all_abstracts[i],all_title_vectors[i],all_abstract_vectors[i]))
         # what if we summarize each abstract with a basic LLM first?
-        save_to_pkl(all_vectors, filename)
 
-    data = load_from_pkl(filename)
+        save_to_pkl(all_papers, filename)
+
+    all_papers = load_from_pkl(filename)
+
+    data = [paper.abstract_vector for paper in all_papers]
 
     clusterer = Clusterer(data)
     opt_num_components = clusterer.optimal_pca_components(show_graph=True)
