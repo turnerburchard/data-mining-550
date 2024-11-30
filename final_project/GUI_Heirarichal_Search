@@ -47,7 +47,7 @@ def on_button_click():
 
 # Create the main application window
 root = tk.Tk()
-root.title("Input Processing GUI")
+root.title("Heirarichal Cluster Search")
 root.geometry("800x600")
 root.configure(bg="#f0f0f0")  # Light gray background
 
@@ -59,8 +59,12 @@ num_var = tk.StringVar()
 input_frame = ttk.Frame(root, padding="10 10 10 10")
 input_frame.pack(fill="x", pady=10)
 
-# Text Input
-ttk.Label(input_frame, text="Cluster Search:", anchor="w").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+# intro_text = """
+# Enter your own abstract, and a desired amount of papers, and Heirarichal Cluster Search will find
+# the cluster closest in size to the given amount, which is closest to your abstract.
+# """
+# # Text Input
+# ttk.Label(input_frame, text=intro_text, anchor="w")
 
 ttk.Label(input_frame, text="Query:", anchor="w").grid(row=0, column=0, sticky="w", padx=5, pady=5)
 text_entry = ttk.Entry(input_frame, textvariable=text_var, width=30)
