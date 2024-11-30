@@ -7,6 +7,7 @@ from cluster import Clusterer
 from embed import Embedder
 
 from data_store import Paper
+from search import find_target_cluster
 
 # temp stuff so we dont have to keep pinging api
 from pickle_helpers import save_to_pkl, load_from_pkl
@@ -94,7 +95,7 @@ def main():
     opt_num_components = clusterer.optimal_pca_components(show_graph=True)
     clusterer.find_optimal_k()
 
-    clusterer.reduce_dimensions(2)
+    transform_vector = clusterer.reduce_dimensions(2)
     kmeans_clusters = clusterer.kmeans()
     print(f"Centroids for K-Means {clusterer.cluster_centroids(kmeans_clusters)}")
     # print(f"K-Means Cluster Names {clusterer.name_clusters()}")
@@ -108,16 +109,17 @@ def main():
     # clusterer.visualize_dbscan()
 
 
-    agg_clusters = clusterer.agglomerative()
+    agg_clusters, linkage_matrix = clusterer.agglomerative()
     agg_score = clusterer.silhouette_score(agg_clusters)
     print("Agglomerative silhouette score: ", agg_score)
     clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
-    clusterer.visualize_dendrogram()
+    clusterer.visualize_dendrogram(linkage_matrix)
 
     som_clusters = clusterer.som(size = 2)
     som_score = clusterer.silhouette_score(som_clusters)
     print("SOM silhouette score: ", som_score)
     clusterer.visualize(som_clusters, "SOM")
+
 
     # for item in query:
     #     print(get_info(item))

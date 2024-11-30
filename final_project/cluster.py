@@ -32,6 +32,9 @@ class Clusterer:
         print(f"Reducing dimensions to {n_components}")
         pca = PCA(n_components=n_components)
         self.data = pca.fit_transform(self.data)
+        transform_vector = lambda q: pca.transform([q])[0]
+        return transform_vector
+
 
     def optimal_pca_components(self, threshold=0.95, show_graph=False):
         pca = PCA()
@@ -153,11 +156,12 @@ class Clusterer:
     # Agglomerative Hierarchical Clustering Implementation
     def agglomerative(self, n_clusters=2):
         agg = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
-        return agg.fit_predict(self.data)
+        linkage_matrix = linkage(self.data, method='ward')
+        return (agg.fit_predict(self.data),linkage_matrix)
 
-    def visualize_dendrogram(self):
+    def visualize_dendrogram(self, linakage_matrix):
         plt.figure(figsize=(10, 5))
-        dendrogram(linkage(self.data, method='ward'), truncate_mode=None)  # No truncation, full dendrogram
+        dendrogram(linakage_matrix, truncate_mode=None)  # No truncation, full dendrogram
         plt.title("Dendrogram from Agglomerative Clustering")
         plt.xlabel("Data Points")
         plt.ylabel("Euclidean Distance")
