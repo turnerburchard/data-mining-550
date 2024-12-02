@@ -135,11 +135,11 @@ def get_all_papers(filename, topic):
 
 def main():
     # change filename here if needed
-    filename = 'data.pkl'
+    filename = 'final_project/data_10000.pkl'
     sample_size = 10000
 
-    #get_sample(sample_size, filename, "Computer Science")
-    get_all_papers(filename, topic="Computer Science")
+    get_sample(sample_size, filename, "Computer Science")
+    # get_all_papers(filename, topic="Computer Science")
 
     all_papers = load_from_pkl(filename)
 
