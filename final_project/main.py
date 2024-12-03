@@ -147,12 +147,12 @@ def main():
 
     all_papers = load_from_pkl(path+filename)
 
-    embedder = Embedder()
-    title_words = list(set([word.lower() for paper in all_papers for word in paper.title.split()]))
-    title_word_vectors = embedder.embed_texts(title_words)
+    # embedder = Embedder()
+    # title_words = list(set([word.lower() for paper in all_papers for word in paper.title.split()]))
+    # title_word_vectors = embedder.embed_texts(title_words)
     
-    name_data = NammingData(title_words, title_word_vectors)
-    save_to_pkl(name_data, path+"name_data_10k")
+    # name_data = NammingData(title_words, title_word_vectors)
+    # save_to_pkl(name_data, path+"name_data_10k")
     
     name_data = load_from_pkl(path+"name_data_10k")
     data = [paper.abstract_vector for paper in all_papers]
@@ -205,8 +205,8 @@ def main():
         
     print(f"Agglomerative Cluster Names {agg_names}")
     print("Agglomerative silhouette score: ", agg_silhouette_score)
-    # clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
-    # clusterer.visualize_dendrogram(linkage_matrix)
+    clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
+    clusterer.visualize_dendrogram(linkage_matrix)
 
     if not os.path.exists(path+som_filename):
         som_clusters = clusterer.som(size = 2)
@@ -222,7 +222,7 @@ def main():
 
     print("SOM names: ", som_names)
     print("SOM silhouette score: ", som_silhouette_score)
-    # clusterer.visualize(som_clusters, "SOM")
+    clusterer.visualize(som_clusters, "SOM")
 
 
     # for item in query:

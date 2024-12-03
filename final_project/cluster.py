@@ -75,7 +75,7 @@ class Clusterer:
         plt.grid()
         plt.show()
 
-    def kmeans(self, n_clusters=2):
+    def kmeans(self, n_clusters=9):
         kmeans = KMeans(n_clusters=n_clusters, random_state=0)
         labels = kmeans.fit_predict(self.data)
         return labels
