@@ -188,11 +188,8 @@ def main():
     # clusterer.visualize_dbscan()
 
     if not os.path.exists(path+agg_filename):
-        print("a)")
         agg_clusters, linkage_matrix = clusterer.agglomerative()
-        print("b")
         agg_names = clusterer.name_clusters(agg_clusters, name_data.word_list, name_data.vector_list)
-        print("c")
         agg_silhouette_score = clusterer.silhouette_score(agg_clusters)
         agg = Cluster(agg_clusters, agg_names, agg_silhouette_score, linkage_matrix)
         save_to_pkl(agg, path+agg_filename)
