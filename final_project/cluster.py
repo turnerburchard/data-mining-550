@@ -1,7 +1,8 @@
-from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering, MiniBatchKMeans, Birch
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.metrics import pairwise_distances
 from sklearn.decomposition import PCA
+from sklearn.mixture import GaussianMixture
 from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 from minisom import MiniSom
@@ -76,8 +77,13 @@ class Clusterer:
 
     def kmeans(self, n_clusters=2):
         kmeans = KMeans(n_clusters=n_clusters, random_state=0)
-        self.labels = kmeans.fit_predict(self.data)
-        return self.labels
+        labels = kmeans.fit_predict(self.data)
+        return labels
+
+    def minibatch_kmeans(self, n_clusters=2, batch_size=100):
+        minibatch_kmeans = MiniBatchKMeans(n_clusters=n_clusters, random_state=0, batch_size=batch_size)
+        labels = minibatch_kmeans.fit_predict(self.data)
+        return labels
 
     def visualize(self, labels, algorithm):
         if self.data.shape[1] != 2:
@@ -183,6 +189,16 @@ class Clusterer:
         cluster_labels = np.array([bmu_to_label[tuple(bmu)] for bmu in bmus])
 
         return cluster_labels
+
+    def birch(self, n_clusters=2):
+        birch = Birch(n_clusters=n_clusters)
+        labels = birch.fit_predict(self.data)
+        return labels
+
+    def gaussian_mixture(self, n_components=2):
+        gmm = GaussianMixture(n_components=n_components, random_state=0)
+        labels = gmm.fit_predict(self.data)
+        return labels
     
     def cluster_centroids(self, labels):
         unique_labels = np.unique(labels)
