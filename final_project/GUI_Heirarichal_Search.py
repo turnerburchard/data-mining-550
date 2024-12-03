@@ -8,12 +8,13 @@ from search import find_target_cluster
 
 #Data Processing 
 
-filename = 'data.pkl'
+filename = 'final_project/Data/10k/data_10k.pkl'
 all_papers = load_from_pkl(filename)
 data = [paper.abstract_vector for paper in all_papers]
 clusterer = Clusterer(data)
-transform = clusterer.reduce_dimensions(2)
-agg_clusters, linkage_matrix = clusterer.agglomerative()
+transform = clusterer.reduce_dimensions(273)
+linkage_matrix = load_from_pkl('final_project/Data/10k/agg_10k').linkage_matrix
+# agg_clusters, linkage_matrix = clusterer.agglomerative()
 embedder = Embedder()
 
 # Example function to process inputs
@@ -26,7 +27,7 @@ def process_inputs(text, num):
 # Button click handler
 def on_button_click():
     try:
-        text_input = text_var.get()
+        text_input = text_widget.get("1.0", tk.END).strip()
         num_input = int(num_var.get())
         result_list = process_inputs(text_input, num_input)
         result_list = ["\u2022"+result for result in result_list]
@@ -48,7 +49,7 @@ def on_button_click():
 # Create the main application window
 root = tk.Tk()
 root.title("Heirarichal Cluster Search")
-root.geometry("800x600")
+root.geometry("1400x1000")
 root.configure(bg="#f0f0f0")  # Light gray background
 
 # Create StringVars to manage the input/output field values
@@ -66,9 +67,13 @@ input_frame.pack(fill="x", pady=10)
 # # Text Input
 # ttk.Label(input_frame, text=intro_text, anchor="w")
 
-ttk.Label(input_frame, text="Query:", anchor="w").grid(row=0, column=0, sticky="w", padx=5, pady=5)
-text_entry = ttk.Entry(input_frame, textvariable=text_var, width=30)
-text_entry.grid(row=0, column=1, padx=5, pady=5)
+# ttk.Label(input_frame, text="Query:", anchor="w").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+# text_entry = ttk.Entry(input_frame, textvariable=text_var, width=30)
+# text_entry.grid(row=0, column=1, padx=5, pady=5)
+ttk.Label(input_frame, text="Query:", anchor="w").grid(row=0, column=0, sticky="nw", padx=5, pady=5)
+# Text Widget for multi-line input
+text_widget = tk.Text(input_frame, wrap=tk.WORD, height=10, width=60)
+text_widget.grid(row=0, column=1, padx=5, pady=5)
 
 # Integer Input
 ttk.Label(input_frame, text="Cluster Size:", anchor="w").grid(row=1, column=0, sticky="w", padx=5, pady=5)
