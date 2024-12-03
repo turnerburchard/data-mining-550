@@ -6,7 +6,7 @@ from crossref.restful import Works, Etiquette
 from cluster import Clusterer
 from embed import Embedder
 
-from data_store import Paper
+from data_store import Paper, Cluster, NammingData
 from search import find_target_cluster
 
 # temp stuff so we dont have to keep pinging api
@@ -135,48 +135,94 @@ def get_all_papers(filename, topic):
 
 def main():
     # change filename here if needed
-    filename = 'final_project/data_10000.pkl'
+    path = 'final_project/Data/10k/'
+    filename = 'data_10k.pkl'
+    kmeans_filename = 'kmeans10k'
+    agg_filename = 'agg_10k'
+    som_filename = 'som_10k'
     sample_size = 10000
 
-    get_sample(sample_size, filename, "Computer Science")
+    # get_sample(sample_size, path+filename, "Computer Science")
     # get_all_papers(filename, topic="Computer Science")
 
-    all_papers = load_from_pkl(filename)
+    all_papers = load_from_pkl(path+filename)
 
     embedder = Embedder()
-    title_words = [word.lower() for paper in all_papers for word in paper.title.split()]
+    title_words = list(set([word.lower() for paper in all_papers for word in paper.title.split()]))
     title_word_vectors = embedder.embed_texts(title_words)
-
+    
+    name_data = NammingData(title_words, title_word_vectors)
+    save_to_pkl(name_data, path+"name_data_10k")
+    
+    name_data = load_from_pkl(path+"name_data_10k")
     data = [paper.abstract_vector for paper in all_papers]
 
     clusterer = Clusterer(data)
     opt_num_components = clusterer.optimal_pca_components(show_graph=True)
-    clusterer.find_optimal_k()
+    # opt_num_components = 280 #for 50k dataset
+    print(f'Optimal number of componets is {opt_num_components}')
+    # clusterer.find_optimal_k()
 
-    clusterer.reduce_dimensions(2)
-    kmeans_clusters = clusterer.kmeans()
-    print(f"Centroids for K-Means {clusterer.cluster_centroids(kmeans_clusters)}")
-    print(f"K-Means Cluster Names {clusterer.name_clusters(kmeans_clusters,title_words, title_word_vectors)}")
+    clusterer.reduce_dimensions(opt_num_components)
+
+    if not os.path.exists(path+kmeans_filename):
+        kmeans_clusters = clusterer.kmeans()
+        kmeans_names = clusterer.name_clusters(kmeans_clusters, name_data.word_list, name_data.vector_list)
+        kmeans_silhouette_score = clusterer.silhouette_score(kmeans_clusters)
+        kmeans = Cluster(kmeans_clusters, kmeans_names, kmeans_silhouette_score)
+        save_to_pkl(kmeans, path+kmeans_filename)
+    else :
+        kmeans = load_from_pkl(path+kmeans_filename)
+        kmeans_clusters = kmeans.labels
+        kmeans_names = kmeans.names
+        kmeans_silhouette_score = kmeans.silhouette_score
+        
+    print(f"K-Means Cluster Names {kmeans_names}")
+    print("K-means silhouette score: ", kmeans_silhouette_score)
     clusterer.visualize(kmeans_clusters, "KMeans")
-    kmeans_score = clusterer.silhouette_score(kmeans_clusters)
-    print("K-means silhouette score: ", kmeans_score)
 
-    dbscan_clusters = clusterer.dbscan()
+
+    # dbscan_clusters = clusterer.dbscan()
     # clusterer.silhouette_score(dbscan_clusters)
     # runs and visualizes
     # clusterer.visualize_dbscan()
 
+    if not os.path.exists(path+agg_filename):
+        print("a)")
+        agg_clusters, linkage_matrix = clusterer.agglomerative()
+        print("b")
+        agg_names = clusterer.name_clusters(agg_clusters, name_data.word_list, name_data.vector_list)
+        print("c")
+        agg_silhouette_score = clusterer.silhouette_score(agg_clusters)
+        agg = Cluster(agg_clusters, agg_names, agg_silhouette_score, linkage_matrix)
+        save_to_pkl(agg, path+agg_filename)
+    else :
+        agg = load_from_pkl(path+agg_filename)
+        agg_clusters = agg.labels
+        agg_names = agg.names
+        agg_silhouette_score = agg.silhouette_score
+        linkage_matrix = agg.linkage_matrix
+        
+    print(f"Agglomerative Cluster Names {agg_names}")
+    print("Agglomerative silhouette score: ", agg_silhouette_score)
+    # clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
+    # clusterer.visualize_dendrogram(linkage_matrix)
 
-    agg_clusters, linkage_matrix = clusterer.agglomerative()
-    agg_score = clusterer.silhouette_score(agg_clusters)
-    print("Agglomerative silhouette score: ", agg_score)
-    clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
-    clusterer.visualize_dendrogram(linkage_matrix)
+    if not os.path.exists(path+som_filename):
+        som_clusters = clusterer.som(size = 2)
+        som_names = clusterer.name_clusters(som_clusters, name_data.word_list, name_data.vector_list)
+        som_silhouette_score = clusterer.silhouette_score(som_clusters)
+        som = Cluster(som_clusters, som_names, som_silhouette_score)
+        save_to_pkl(som,path+som_filename)
+    else:
+        som = load_from_pkl(path+som_filename)
+        som_clusters = som.labels
+        som_names = som.names
+        som_silhouette_score = som.silhouette_score
 
-    som_clusters = clusterer.som(size = 2)
-    som_score = clusterer.silhouette_score(som_clusters)
-    print("SOM silhouette score: ", som_score)
-    clusterer.visualize(som_clusters, "SOM")
+    print("SOM names: ", som_names)
+    print("SOM silhouette score: ", som_silhouette_score)
+    # clusterer.visualize(som_clusters, "SOM")
 
 
     # for item in query:

@@ -86,11 +86,13 @@ class Clusterer:
         return labels
 
     def visualize(self, labels, algorithm):
-        if self.data.shape[1] != 2:
-            raise ValueError("Data must be 2-dimensional for visualization.")
+        pca = PCA(n_components=2)
+        vis_data = pca.fit_transform(self.data)
+        # if self.data.shape[1] != 2:
+        #     raise ValueError("Data must be 2-dimensional for visualization.")
 
         plt.figure(figsize=(8, 6))
-        plt.scatter(self.data[:, 0], self.data[:, 1], c=labels, cmap='viridis', s=50, alpha=0.7)
+        plt.scatter(vis_data[:, 0], vis_data[:, 1], c=labels, cmap='viridis', s=50, alpha=0.7)
         plt.title(f'2D Visualization of {algorithm} Clusters')
         plt.xlabel('Principal Component 1')
         plt.ylabel('Principal Component 2')
