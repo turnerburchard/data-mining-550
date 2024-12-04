@@ -155,7 +155,7 @@ def main():
     # name_data = NammingData(title_words, title_word_vectors)
     # save_to_pkl(name_data, path+"name_data_10k")
     
-    name_data = load_from_pkl(path+"name_data_10k")
+    name_data = load_from_pkl(path+name_data_filename)
     data = [paper.abstract_vector for paper in all_papers]
 
     clusterer = Clusterer(data)
