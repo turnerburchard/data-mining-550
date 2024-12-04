@@ -7,8 +7,7 @@ from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 from minisom import MiniSom
 import numpy as np
-from sklearn.metrics import silhouette_score
-from embed import Embedder
+from sklearn.metrics import silhouette_score, davies_bouldin_score
 import math
 
 
@@ -29,6 +28,9 @@ class Clusterer:
 
     def silhouette_score(self, labels):
         return silhouette_score(self.data, labels)
+    
+    def dbi(self, labels):
+        return davies_bouldin_score(self.data, labels)
 
     def reduce_dimensions(self, n_components=2):
         print(f"Reducing dimensions to {n_components}")

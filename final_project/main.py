@@ -137,9 +137,10 @@ def main():
     # change filename here if needed
     path = 'final_project/Data/10k/'
     filename = 'data_10k.pkl'
+    name_data_filename = 'name_data_10k'
     kmeans_filename = 'kmeans10k'
-    agg_filename = 'agg_10k'
-    som_filename = 'som_10k'
+    agg_filename = 'agg10k'
+    som_filename = 'som10k'
     sample_size = 10000
 
     # get_sample(sample_size, path+filename, "Computer Science")
@@ -165,10 +166,13 @@ def main():
 
     clusterer.reduce_dimensions(opt_num_components)
 
-    if not os.path.exists(path+kmeans_filename):
+    rerun = True
+
+    if not os.path.exists(path+kmeans_filename) or rerun:
         kmeans_clusters = clusterer.kmeans()
         kmeans_names = clusterer.name_clusters(kmeans_clusters, name_data.word_list, name_data.vector_list)
         kmeans_silhouette_score = clusterer.silhouette_score(kmeans_clusters)
+        kmeans_dbi_score = clusterer.dbi(kmeans_clusters)
         kmeans = Cluster(kmeans_clusters, kmeans_names, kmeans_silhouette_score)
         save_to_pkl(kmeans, path+kmeans_filename)
     else :
@@ -176,9 +180,11 @@ def main():
         kmeans_clusters = kmeans.labels
         kmeans_names = kmeans.names
         kmeans_silhouette_score = kmeans.silhouette_score
+        kmeans_dbi_score = kmeans.dbi_score
         
     print(f"K-Means Cluster Names {kmeans_names}")
     print("K-means silhouette score: ", kmeans_silhouette_score)
+    print("K-means DBI score: ", kmeans_dbi_score)
     clusterer.visualize(kmeans_clusters, "KMeans")
 
 
@@ -187,10 +193,11 @@ def main():
     # runs and visualizes
     # clusterer.visualize_dbscan()
 
-    if not os.path.exists(path+agg_filename):
+    if not os.path.exists(path+agg_filename) or rerun:
         agg_clusters, linkage_matrix = clusterer.agglomerative()
         agg_names = clusterer.name_clusters(agg_clusters, name_data.word_list, name_data.vector_list)
         agg_silhouette_score = clusterer.silhouette_score(agg_clusters)
+        agg_dbi_score = clusterer.dbi(agg_clusters)
         agg = Cluster(agg_clusters, agg_names, agg_silhouette_score, linkage_matrix)
         save_to_pkl(agg, path+agg_filename)
     else :
@@ -198,17 +205,20 @@ def main():
         agg_clusters = agg.labels
         agg_names = agg.names
         agg_silhouette_score = agg.silhouette_score
+        agg_dbi_score = agg.dbi_score
         linkage_matrix = agg.linkage_matrix
         
     print(f"Agglomerative Cluster Names {agg_names}")
     print("Agglomerative silhouette score: ", agg_silhouette_score)
+    print("Agglomerative DBI score: ", agg_dbi_score)
     clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
     clusterer.visualize_dendrogram(linkage_matrix)
 
-    if not os.path.exists(path+som_filename):
+    if not os.path.exists(path+som_filename) or rerun:
         som_clusters = clusterer.som(size = 2)
         som_names = clusterer.name_clusters(som_clusters, name_data.word_list, name_data.vector_list)
         som_silhouette_score = clusterer.silhouette_score(som_clusters)
+        som_dbi_score = clusterer.dbi(som_clusters)
         som = Cluster(som_clusters, som_names, som_silhouette_score)
         save_to_pkl(som,path+som_filename)
     else:
@@ -216,9 +226,11 @@ def main():
         som_clusters = som.labels
         som_names = som.names
         som_silhouette_score = som.silhouette_score
+        som_dbi_score = som.dbi_score
 
     print("SOM names: ", som_names)
     print("SOM silhouette score: ", som_silhouette_score)
+    print("SOM DBI score: ", som_dbi_score)
     clusterer.visualize(som_clusters, "SOM")
 
 

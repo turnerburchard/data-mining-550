@@ -6,10 +6,11 @@ class Paper:
         self.abstract_vector = abstract_vector 
 
 class Cluster:
-    def __init__(self, labels, names, silhouette_score, linakge_matrix = 0):
+    def __init__(self, labels, names, silhouette_score,dbi_score, linakge_matrix = 0):
         self.labels = labels
         self.names = names
         self.silhouette_score = silhouette_score
+        self.dbi_score = dbi_score
         self.linkage_matrix = linakge_matrix
 
 class NammingData:
