@@ -168,4 +168,4 @@ cython_debug/
 visualizations.ipynb
 
 test.py
-50k/
+final_project/Data/50k/data_50k.pkl

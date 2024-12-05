@@ -135,42 +135,46 @@ def get_all_papers(filename, topic):
 
 def main():
     # change filename here if needed
-    path = 'final_project/Data/10k/'
-    filename = 'data_10k.pkl'
-    name_data_filename = 'name_data_10k'
-    kmeans_filename = '2/kmeans10k'
-    agg_filename = '2/agg10k'
-    som_filename = '2/som10k'
+    path = 'final_project/Data/50k/'
+    filename = 'data_50k.pkl'
+    name_data_filename = 'name_data_50k'
+    kmeans_filename = '2/kmeans50k'
+    agg_filename = '2/agg50k'
+    som_filename = '2/som50k'
+    gauss_filename = '2/gauss50k'
     sample_size = 10000
     dimensions = 2
+    rerun = False
 
     # get_sample(sample_size, path+filename, "Computer Science")
     # get_all_papers(filename, topic="Computer Science")
 
     all_papers = load_from_pkl(path+filename)
 
-    # embedder = Embedder()
-    # title_words = list(set([word.lower() for paper in all_papers for word in paper.title.split()]))
-    # title_word_vectors = embedder.embed_texts(title_words)
+    if((not os.path.exists(path+name_data_filename)) or rerun):
+        embedder = Embedder()
+        title_words = list(set([word.lower() for paper in all_papers for word in paper.title.split()]))
+        title_word_vectors = embedder.embed_texts(title_words)
+        
+        name_data = NammingData(title_words, title_word_vectors)
+        save_to_pkl(name_data, path+name_data_filename)
     
-    # name_data = NammingData(title_words, title_word_vectors)
-    # save_to_pkl(name_data, path+"name_data_10k")
-    
-    name_data = load_from_pkl(path+name_data_filename)
+    else:
+        name_data = load_from_pkl(path+name_data_filename)
     data = [paper.abstract_vector for paper in all_papers]
 
     clusterer = Clusterer(data)
-    opt_num_components = clusterer.optimal_pca_components(show_graph=True)
+    # opt_num_components = clusterer.optimal_pca_components(show_graph=True)
     # opt_num_components = 280 #for 50k dataset
-    print(f'Optimal number of componets is {opt_num_components}')
-    # clusterer.find_optimal_k()
-
+    # print(f'Optimal number of componets is {opt_num_components}')
     clusterer.reduce_dimensions(dimensions)
 
-    rerun = True
+
+    # clusterer.find_optimal_k(max_k=20, interval=4)
+    # return
 
     if ((not os.path.exists(path+kmeans_filename)) or rerun):
-        kmeans_clusters = clusterer.kmeans()
+        kmeans_clusters = clusterer.kmeans(n_clusters=9)
         kmeans_names = clusterer.name_clusters(kmeans_clusters, name_data.word_list, name_data.vector_list)
         kmeans_silhouette_score = clusterer.silhouette_score(kmeans_clusters)
         kmeans_dbi_score = clusterer.dbi(kmeans_clusters)
@@ -186,7 +190,7 @@ def main():
     print(f"K-Means Cluster Names {kmeans_names}")
     print("K-means silhouette score: ", kmeans_silhouette_score)
     print("K-means DBI score: ", kmeans_dbi_score)
-    clusterer.visualize(kmeans_clusters, "KMeans")
+    # clusterer.visualize(kmeans_clusters, "KMeans")
 
 
     # dbscan_clusters = clusterer.dbscan()
@@ -212,8 +216,8 @@ def main():
     print(f"Agglomerative Cluster Names {agg_names}")
     print("Agglomerative silhouette score: ", agg_silhouette_score)
     print("Agglomerative DBI score: ", agg_dbi_score)
-    clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
-    clusterer.visualize_dendrogram(linkage_matrix)
+    # clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
+    # clusterer.visualize_dendrogram(linkage_matrix)
 
     if ((not os.path.exists(path+som_filename)) or rerun):
         som_clusters = clusterer.som(size = 2)
@@ -232,7 +236,26 @@ def main():
     print("SOM names: ", som_names)
     print("SOM silhouette score: ", som_silhouette_score)
     print("SOM DBI score: ", som_dbi_score)
-    clusterer.visualize(som_clusters, "SOM")
+    # clusterer.visualize(som_clusters, "SOM")
+
+    if ((not os.path.exists(path+gauss_filename)) or rerun):
+        gauss_clusters = clusterer.gaussian_mixture(n_components=8)
+        gauss_names = clusterer.name_clusters(gauss_clusters, name_data.word_list, name_data.vector_list)
+        gauss_silhouette_score = clusterer.silhouette_score(gauss_clusters)
+        gauss_dbi_score = clusterer.dbi(gauss_clusters)
+        gauss = Cluster(gauss_clusters, gauss_names, gauss_silhouette_score, gauss_dbi_score)
+        save_to_pkl(gauss, path+gauss_filename)
+    else :
+        gauss = load_from_pkl(path+gauss_filename)
+        gauss_clusters = gauss.labels
+        gauss_names = gauss.names
+        gauss_silhouette_score = gauss.silhouette_score
+        gauss_dbi_score = gauss.dbi_score
+        
+    print(f"Gausiian Mixture Cluster Names {gauss_names}")
+    print("Gausiian Mixture silhouette score: ", gauss_silhouette_score)
+    print("Gausiian Mixture DBI score: ", gauss_dbi_score)
+    clusterer.visualize(gauss_clusters, "Gausiian Mixture")
 
 
     # for item in query:
