@@ -1,5 +1,5 @@
 from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering, MiniBatchKMeans, Birch
-from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 from sklearn.metrics import pairwise_distances
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
@@ -100,6 +100,10 @@ class Clusterer:
         plt.ylabel('Principal Component 2')
         plt.colorbar(label='Cluster')
         plt.show()
+
+    def visualize_agglomerative(self, linkage, n_clusters = 2):
+        cluster_labels = fcluster(linkage, n_clusters, criterion='maxclust')
+        self.visualize(cluster_labels, "Agglomerative")
 
     def find_optimal_k(self, max_k=10):
         scores = []

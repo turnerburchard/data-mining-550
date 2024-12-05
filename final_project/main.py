@@ -216,9 +216,9 @@ def main():
     print(f"Agglomerative Cluster Names {agg_names}")
     print("Agglomerative silhouette score: ", agg_silhouette_score)
     print("Agglomerative DBI score: ", agg_dbi_score)
-    # clusterer.visualize(agg_clusters, "Agglomerative Hierarchical Clustering")
-    # clusterer.visualize_dendrogram(linkage_matrix)
-
+    clusterer.visualize_agglomerative(linkage_matrix, n_clusters=8)
+    clusterer.visualize_dendrogram(linkage_matrix)
+    
     if ((not os.path.exists(path+som_filename)) or rerun):
         som_clusters = clusterer.som(size = 2)
         som_names = clusterer.name_clusters(som_clusters, name_data.word_list, name_data.vector_list)

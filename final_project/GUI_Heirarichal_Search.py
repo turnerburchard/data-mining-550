@@ -14,6 +14,7 @@ data = [paper.abstract_vector for paper in all_papers]
 clusterer = Clusterer(data)
 transform = clusterer.reduce_dimensions(273)
 linkage_matrix = load_from_pkl('final_project/Data/50k/280/agg50k').linkage_matrix
+
 # agg_clusters, linkage_matrix = clusterer.agglomerative()
 embedder = Embedder()
 
