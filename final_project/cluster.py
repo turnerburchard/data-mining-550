@@ -47,7 +47,9 @@ class Clusterer:
         if show_graph:
             plt.figure(figsize=(8, 6))
             plt.plot(range(1, len(cumulative_variance) + 1), cumulative_variance, marker='o')
-            plt.axhline(y=threshold, color='r', linestyle='--', label=f'{threshold * 100}% Threshold')
+            plt.axhline(y=0.95, color='red', linestyle='--', label=f'95% Threshold')
+            plt.axhline(y=0.70, color='orange', linestyle='--', label=f'70% Threshold')
+            plt.axhline(y=0.20, color='yellow', linestyle='--', label=f'20% Threshold')
             plt.xlabel('Number of Components')
             plt.ylabel('Cumulative Explained Variance')
             plt.title('Explained Variance by Number of Components')
@@ -85,19 +87,36 @@ class Clusterer:
         labels = minibatch_kmeans.fit_predict(self.data)
         return labels
 
-    def visualize(self, labels, algorithm):
+    def visualize(self, labels, algorithm, cluster_names):
         if self.data.shape[1] != 2:
             raise ValueError("Data must be 2-dimensional for visualization.")
+
+        # Validate cluster_names length
+        if len(cluster_names) != len(np.unique(labels)):
+            raise ValueError("The number of cluster names must match the number of unique labels.")
+
+        # Calculate centroids of clusters
+        centroids = []
+        for cluster_id in np.unique(labels):
+            cluster_points = self.data[labels == cluster_id]
+            centroid = cluster_points.mean(axis=0)
+            centroids.append(centroid)
+
+        centroids = np.array(centroids)
 
         plt.figure(figsize=(8, 6))
         plt.scatter(self.data[:, 0], self.data[:, 1], c=labels, cmap='viridis', s=50, alpha=0.7)
         plt.title(f'2D Visualization of {algorithm} Clusters')
         plt.xlabel('Principal Component 1')
         plt.ylabel('Principal Component 2')
-        plt.colorbar(label='Cluster')
+
+        # Label clusters with custom names
+        for i, (x, y) in enumerate(centroids):
+            plt.text(x, y, cluster_names[i], fontsize=12, fontweight='bold', ha='center', va='center')
+
         plt.show()
 
-    def find_optimal_k(self, max_k=10):
+    def find_optimal_k(self, max_k=20):
         scores = []
         for k in range(2, max_k + 1):
             kmeans = KMeans(n_clusters=k, random_state=0).fit(self.data)
